@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">location</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9001.9001</span>
       </span>
     </div>
 
@@ -85,17 +85,17 @@
 <span></span>
 <span><span class="co"># Single place</span></span>
 <span><span class="fu"><a href="reference/loc.html">loc</a></span><span class="op">(</span><span class="st">"Hobart, Tasmania"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              query       lat      lon</span></span>
-<span><span class="co">#&gt; 1 Hobart, Tasmania -42.88251 147.3281</span></span>
-<span><span class="co">#&gt;                                  display_name osm_type</span></span>
-<span><span class="co">#&gt; 1 Hobart, City of Hobart, Tasmania, Australia relation</span></span>
+<span><span class="co">#&gt;        lon       lat                                        name</span></span>
+<span><span class="co">#&gt; 1 147.3281 -42.88251 Hobart, City of Hobart, Tasmania, Australia</span></span>
+<span><span class="co">#&gt;              query osm_type</span></span>
+<span><span class="co">#&gt; 1 Hobart, Tasmania relation</span></span>
 <span></span>
 <span><span class="co"># Multiple places - one request per second (Nominatim policy)</span></span>
 <span><span class="fu"><a href="reference/loc.html">loc</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Davis Station, Antarctica"</span>, <span class="st">"Casey Station"</span>, <span class="st">"Mawson Station"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                       query       lat       lon   display_name osm_type</span></span>
-<span><span class="co">#&gt; 1 Davis Station, Antarctica        NA        NA           &lt;NA&gt;     &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2             Casey Station -66.28209 110.52408  Casey Station     node</span></span>
-<span><span class="co">#&gt; 3            Mawson Station -67.60290  62.87375 Mawson Station     node</span></span>
+<span><span class="co">#&gt;         lon       lat           name                     query osm_type</span></span>
+<span><span class="co">#&gt; 1        NA        NA           &lt;NA&gt; Davis Station, Antarctica     &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2 110.52408 -66.28209  Casey Station             Casey Station     node</span></span>
+<span><span class="co">#&gt; 3  62.87375 -67.60290 Mawson Station            Mawson Station     node</span></span>
 <span></span>
 <span><span class="co"># Straight to timezone (requires lutz)</span></span>
 <span><span class="fu"><a href="reference/loc_tz.html">loc_tz</a></span><span class="op">(</span><span class="st">"Crystal Lake, TN"</span><span class="op">)</span></span>

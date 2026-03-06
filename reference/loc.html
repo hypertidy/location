@@ -19,7 +19,7 @@ input."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">location</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9001.9001</span>
       </span>
     </div>
 
@@ -82,7 +82,7 @@ Usually 1 is what you want. The Nominatim API caps this at 50.</p></dd>
 <dt id="arg-full">full<a class="anchor" aria-label="anchor" href="#arg-full"></a></dt>
 <dd><p>logical. If <code>TRUE</code>, return all fields from the Nominatim
 response as list-columns. If <code>FALSE</code> (default), return only <code>query</code>,
-<code>lat</code>, <code>lon</code>, <code>display_name</code>, and <code>osm_type</code>.</p></dd>
+<code>lon</code>, <code>lat</code>, <code>name</code>, <code>query</code>, and <code>osm_type</code>.</p></dd>
 
 
 <dt id="arg-api-url">api_url<a class="anchor" aria-label="anchor" href="#arg-api-url"></a></dt>
@@ -92,17 +92,17 @@ instance: <code>"http://localhost:7070"</code>.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame with columns:</p><dl><dt>query</dt>
-<dd><p>the original input string</p></dd>
+    <p>A data frame with columns:</p><dl><dt>lon</dt>
+<dd><p>longitude (numeric, or <code>NA</code> if not found)</p></dd>
 
 <dt>lat</dt>
 <dd><p>latitude (numeric, or <code>NA</code> if not found)</p></dd>
 
-<dt>lon</dt>
-<dd><p>longitude (numeric, or <code>NA</code> if not found)</p></dd>
-
-<dt>display_name</dt>
+<dt>name</dt>
 <dd><p>full place name as returned by Nominatim</p></dd>
+
+<dt>query</dt>
+<dd><p>the original input string</p></dd>
 
 <dt>osm_type</dt>
 <dd><p>OSM object type: <code>"node"</code>, <code>"way"</code>, or <code>"relation"</code></p></dd>
