@@ -4,9 +4,13 @@
 #' for one or more place name strings. Returns a data frame with one row per
 #' input.
 #'
+#' Results are cached for the duration of the R session, so repeated calls
+#' with the same query string are free. The cache can be inspected with
+#' [loc_cache_show()] and cleared with [loc_cache_clear()].
+#'
 #' Nominatim's usage policy requires a descriptive `User-Agent` and a maximum
 #' rate of one request per second. `loc()` enforces the rate limit automatically
-#' and sets a meaningful user-agent. See
+#' and warns if the service is being queried heavily. See
 #' <https://operations.osmfoundation.org/policies/nominatim/>.
 #'
 #' @param x character vector of place names, e.g. `"Jackson, TN"` or
@@ -15,16 +19,16 @@
 #'   Usually 1 is what you want. The Nominatim API caps this at 50.
 #' @param full logical. If `TRUE`, return all fields from the Nominatim
 #'   response as list-columns. If `FALSE` (default), return only `query`,
-#'   `lat`, `lon`, `display_name`, and `osm_type`.
+#'   `lon`, `lat`, `name`, `query`, and `osm_type`.
 #' @param api_url base URL for the Nominatim API. Override to use a local
 #'   instance: `"http://localhost:7070"`.
 #'
 #' @return A data frame with columns:
 #'   \describe{
-#'     \item{query}{the original input string}
-#'     \item{lat}{latitude (numeric, or `NA` if not found)}
 #'     \item{lon}{longitude (numeric, or `NA` if not found)}
-#'     \item{display_name}{full place name as returned by Nominatim}
+#'     \item{lat}{latitude (numeric, or `NA` if not found)}
+#'     \item{name}{full place name as returned by Nominatim}
+#'     \item{query}{the original input string}
 #'     \item{osm_type}{OSM object type: `"node"`, `"way"`, or `"relation"`}
 #'   }
 #'   When `full = TRUE`, all additional Nominatim fields are included as
@@ -35,6 +39,12 @@
 #' loc("Hobart")
 #' loc("Jackson, TN")
 #' loc(c("Davis Station", "Casey Station", "Mawson Station"))
+#'
+#' # repeated calls hit the cache, not Nominatim
+#' loc("Hobart")
+#'
+#' # inspect what's been cached this session
+#' loc_cache_show()
 #' }
 #'
 #' @export
@@ -47,17 +57,42 @@ loc <- function(x, limit = 1L, full = FALSE,
   }
 
   results <- vector("list", length(x))
+  need_sleep <- FALSE
   for (i in seq_along(x)) {
-    if (i > 1L) Sys.sleep(1)  # Nominatim: max 1 req/sec
+    key <- .cache_key(x[[i]], limit, api_url)
+    cached <- .loc_env$cache[[key]]
+    if (!is.null(cached)) {
+      results[[i]] <- cached
+      next
+    }
+    if (need_sleep) Sys.sleep(1)  # Nominatim: max 1 req/sec between live requests
+    .check_rate()
     results[[i]] <- .loc_one(x[[i]], limit = limit, full = full,
-                              api_url = api_url)
+                             api_url = api_url, key = key)
+    need_sleep <- TRUE
   }
   do.call(rbind, results)
 }
 
+## Internal: cache key ----------------------------------------------------
+
+.cache_key <- function(query, limit, api_url) {
+  paste(tolower(trimws(query)), limit, api_url, sep = "\r")
+}
+
 ## Internal: single query -------------------------------------------------
 
-.loc_one <- function(query, limit, full, api_url) {
+.loc_one <- function(query, limit, full, api_url, key) {
+
+  if (trimws(tolower(query)) == "null island") {
+    message("location: Null Island located at (0, 0). Welcome to the origin.")
+    return(data.frame(lon = 0.0, lat = 0.0,
+                      name = "Null Island (0\u00b0N 0\u00b0E)",
+                      query = query,
+                      osm_type = "null island",
+                      stringsAsFactors = FALSE))
+  }
+
   url <- paste0(
     api_url, "/search",
     "?q=", utils::URLencode(query, reserved = TRUE),
@@ -91,11 +126,11 @@ loc <- function(x, limit = 1L, full = FALSE,
   }
 
   out <- data.frame(
-    query        = query,
-    lat          = as.numeric(parsed$lat[[1L]]),
-    lon          = as.numeric(parsed$lon[[1L]]),
-    display_name = parsed$display_name[[1L]],
-    osm_type     = parsed$osm_type[[1L]],
+    lon      = as.numeric(parsed$lon[[1L]]),
+    lat      = as.numeric(parsed$lat[[1L]]),
+    name     = parsed$display_name[[1L]],
+    query    = query,
+    osm_type = parsed$osm_type[[1L]],
     stringsAsFactors = FALSE
   )
 
@@ -106,18 +141,20 @@ loc <- function(x, limit = 1L, full = FALSE,
     out <- cbind(out, extra)
   }
 
+  .loc_env$cache[[key]] <- out
   out
 }
 
 ## Internal: empty result row ---------------------------------------------
 
 .empty_result <- function(query) {
+  n <- length(query)
   data.frame(
-    query        = query,
-    lat          = NA_real_,
-    lon          = NA_real_,
-    display_name = NA_character_,
-    osm_type     = NA_character_,
+    lon      = rep(NA_real_,      n),
+    lat      = rep(NA_real_,      n),
+    name     = rep(NA_character_, n),
+    query    = query,
+    osm_type = rep(NA_character_, n),
     stringsAsFactors = FALSE
   )
 }

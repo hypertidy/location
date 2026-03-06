@@ -25,17 +25,17 @@ library(location)
 
 # Single place
 loc("Hobart, Tasmania")
-#>              query       lat      lon
-#> 1 Hobart, Tasmania -42.88251 147.3281
-#>                                  display_name osm_type
-#> 1 Hobart, City of Hobart, Tasmania, Australia relation
+#>        lon       lat                                        name
+#> 1 147.3281 -42.88251 Hobart, City of Hobart, Tasmania, Australia
+#>              query osm_type
+#> 1 Hobart, Tasmania relation
 
 # Multiple places - one request per second (Nominatim policy)
 loc(c("Davis Station, Antarctica", "Casey Station", "Mawson Station"))
-#>                       query       lat       lon   display_name osm_type
-#> 1 Davis Station, Antarctica        NA        NA           <NA>     <NA>
-#> 2             Casey Station -66.28209 110.52408  Casey Station     node
-#> 3            Mawson Station -67.60290  62.87375 Mawson Station     node
+#>         lon       lat           name                     query osm_type
+#> 1        NA        NA           <NA> Davis Station, Antarctica     <NA>
+#> 2 110.52408 -66.28209  Casey Station             Casey Station     node
+#> 3  62.87375 -67.60290 Mawson Station            Mawson Station     node
 
 # Straight to timezone (requires lutz)
 loc_tz("Crystal Lake, TN")

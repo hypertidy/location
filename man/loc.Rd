@@ -20,7 +20,7 @@ Usually 1 is what you want. The Nominatim API caps this at 50.}
 
 \item{full}{logical. If \code{TRUE}, return all fields from the Nominatim
 response as list-columns. If \code{FALSE} (default), return only \code{query},
-\code{lat}, \code{lon}, \code{display_name}, and \code{osm_type}.}
+\code{lon}, \code{lat}, \code{name}, \code{query}, and \code{osm_type}.}
 
 \item{api_url}{base URL for the Nominatim API. Override to use a local
 instance: \code{"http://localhost:7070"}.}
@@ -28,10 +28,10 @@ instance: \code{"http://localhost:7070"}.}
 \value{
 A data frame with columns:
 \describe{
-\item{query}{the original input string}
-\item{lat}{latitude (numeric, or \code{NA} if not found)}
 \item{lon}{longitude (numeric, or \code{NA} if not found)}
-\item{display_name}{full place name as returned by Nominatim}
+\item{lat}{latitude (numeric, or \code{NA} if not found)}
+\item{name}{full place name as returned by Nominatim}
+\item{query}{the original input string}
 \item{osm_type}{OSM object type: \code{"node"}, \code{"way"}, or \code{"relation"}}
 }
 When \code{full = TRUE}, all additional Nominatim fields are included as
@@ -43,9 +43,13 @@ for one or more place name strings. Returns a data frame with one row per
 input.
 }
 \details{
+Results are cached for the duration of the R session, so repeated calls
+with the same query string are free. The cache can be inspected with
+\code{\link[=loc_cache_show]{loc_cache_show()}} and cleared with \code{\link[=loc_cache_clear]{loc_cache_clear()}}.
+
 Nominatim's usage policy requires a descriptive \code{User-Agent} and a maximum
 rate of one request per second. \code{loc()} enforces the rate limit automatically
-and sets a meaningful user-agent. See
+and warns if the service is being queried heavily. See
 \url{https://operations.osmfoundation.org/policies/nominatim/}.
 }
 \examples{
@@ -53,6 +57,12 @@ and sets a meaningful user-agent. See
 loc("Hobart")
 loc("Jackson, TN")
 loc(c("Davis Station", "Casey Station", "Mawson Station"))
+
+# repeated calls hit the cache, not Nominatim
+loc("Hobart")
+
+# inspect what's been cached this session
+loc_cache_show()
 }
 
 }
